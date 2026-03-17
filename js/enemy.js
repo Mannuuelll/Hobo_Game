@@ -99,12 +99,15 @@ class Enemy {
 
         this.facingRight = dx > 0;
 
+        // Enemies ALWAYS chase the player once spawned
         if (dist < this.attackRange && this.attackCooldown <= 0 && this.onGround && player.alive) {
             this.attack();
-        } else if (dist < this.aggroRange && player.alive) {
+        } else if (player.alive) {
             // Move toward player
             const moveDir = dx > 0 ? 1 : -1;
-            this.vx = moveDir * this.speed;
+            // Run faster if far away to catch up
+            const chaseSpeed = dist > 300 ? this.speed * 1.8 : this.speed;
+            this.vx = moveDir * chaseSpeed;
             this.state = 'walking';
 
             // Random jump
@@ -113,14 +116,8 @@ class Enemy {
                 this.onGround = false;
             }
         } else {
-            // Wander
-            if (this.aiTimer % 120 < 60) {
-                this.vx = (Math.random() > 0.5 ? 1 : -1) * this.speed * 0.3;
-                this.state = 'walking';
-            } else {
-                this.vx *= 0.8;
-                this.state = 'idle';
-            }
+            this.vx *= 0.8;
+            this.state = 'idle';
         }
 
         this.applyPhysics();
