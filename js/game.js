@@ -1,9 +1,58 @@
+// Difficulty presets
+const DifficultySettings = {
+    easy: {
+        playerHp: 150,
+        playerDamageMult: 1.3,
+        enemyDamageMult: 0.5,
+        enemyHpMult: 0.6,
+        enemySpeedMult: 0.7,
+        spawnInterval: 140,
+        maxEnemies: 3,
+        difficultyGrowth: 0.1,
+        chakraRegen: 0.15,
+        label: 'Einfach',
+    },
+    medium: {
+        playerHp: 120,
+        playerDamageMult: 1.0,
+        enemyDamageMult: 0.75,
+        enemyHpMult: 0.8,
+        enemySpeedMult: 0.85,
+        spawnInterval: 110,
+        maxEnemies: 5,
+        difficultyGrowth: 0.15,
+        chakraRegen: 0.12,
+        label: 'Mittel',
+    },
+    hard: {
+        playerHp: 100,
+        playerDamageMult: 1.0,
+        enemyDamageMult: 1.0,
+        enemyHpMult: 1.0,
+        enemySpeedMult: 1.0,
+        spawnInterval: 90,
+        maxEnemies: 8,
+        difficultyGrowth: 0.2,
+        chakraRegen: 0.08,
+        label: 'Schwer',
+    }
+};
+
+let selectedDifficulty = 'easy';
+
+function selectDifficulty(diff) {
+    selectedDifficulty = diff;
+    document.querySelectorAll('.diff-btn').forEach(btn => {
+        btn.classList.toggle('selected', btn.dataset.diff === diff);
+    });
+}
+
 // Main game engine
 const Game = {
     canvas: null,
     ctx: null,
-    width: 480,
-    height: 270,
+    width: 960,
+    height: 540,
     displayWidth: 960,
     displayHeight: 540,
 
@@ -13,6 +62,7 @@ const Game = {
     running: false,
     paused: false,
     gameOver: false,
+    difficulty: null,
 
     keys: {},
     keysPressed: {},
@@ -27,8 +77,8 @@ const Game = {
         this.canvas.width = this.width;
         this.canvas.height = this.height;
 
-        // Disable smoothing for pixel art
-        this.ctx.imageSmoothingEnabled = false;
+        // Enable smoothing for nicer graphics
+        this.ctx.imageSmoothingEnabled = true;
 
         // Input
         window.addEventListener('keydown', (e) => {
@@ -100,7 +150,12 @@ const Game = {
     },
 
     start() {
-        this.player = new Player(100, this.height - 90 - 72);
+        this.difficulty = DifficultySettings[selectedDifficulty];
+        this.player = new Player(100, this.height - 40 - 96);
+        this.player.maxHp = this.difficulty.playerHp;
+        this.player.hp = this.difficulty.playerHp;
+        this.player.chakraRegen = this.difficulty.chakraRegen;
+        this.player.damageMult = this.difficulty.playerDamageMult;
         this.enemies = [];
         this.score = 0;
         this.gameOver = false;
@@ -108,7 +163,7 @@ const Game = {
         this.camera = { x: 0, y: 0 };
 
         Effects.clear();
-        EnemySpawner.reset();
+        EnemySpawner.reset(this.difficulty);
 
         document.getElementById('title-screen').style.display = 'none';
         document.getElementById('game-over-screen').style.display = 'none';
@@ -131,7 +186,7 @@ const Game = {
     update() {
         if (this.gameOver) return;
 
-        const groundLevel = this.height - 20;
+        const groundLevel = this.height - 40;
 
         // Update player
         this.player.update(this.keys, groundLevel);
@@ -200,8 +255,8 @@ const Game = {
             if (effect.type === 'shadowClone' && effect.timer === 15) {
                 for (const enemy of this.enemies) {
                     if (!enemy.alive) continue;
-                    const dist = Math.abs(enemy.centerX - effect.x - 24) + Math.abs(enemy.centerY - effect.y - 36);
-                    if (dist < 80) {
+                    const dist = Math.abs(enemy.centerX - effect.x - 32) + Math.abs(enemy.centerY - effect.y - 48);
+                    if (dist < 120) {
                         const knockDir = effect.facingRight ? 1 : -1;
                         enemy.takeDamage(20, knockDir * 6);
                         this.player.addCombo();
@@ -248,23 +303,24 @@ const Game = {
 
         // Stars
         ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-        for (let i = 0; i < 30; i++) {
+        for (let i = 0; i < 60; i++) {
             const sx = ((i * 73 + 17) % this.width);
-            const sy = ((i * 47 + 13) % (this.height * 0.5));
+            const sy = ((i * 47 + 13) % (this.height * 0.4));
             const blink = Math.sin(Date.now() * 0.001 + i) * 0.3 + 0.7;
             ctx.globalAlpha = blink * 0.5;
-            ctx.fillRect(sx, sy, 1, 1);
+            const starSize = (i % 3 === 0) ? 2 : 1;
+            ctx.fillRect(sx, sy, starSize, starSize);
         }
         ctx.globalAlpha = 1;
 
-        // Moon
+        // Moon (larger)
         ctx.fillStyle = '#FFFFDD';
         ctx.beginPath();
-        ctx.arc(this.width - 60, 40, 20, 0, Math.PI * 2);
+        ctx.arc(this.width - 100, 70, 35, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = '#1a0a2e';
         ctx.beginPath();
-        ctx.arc(this.width - 52, 36, 18, 0, Math.PI * 2);
+        ctx.arc(this.width - 88, 62, 32, 0, Math.PI * 2);
         ctx.fill();
 
         // Background layers with parallax
@@ -272,16 +328,24 @@ const Game = {
 
         // Ground
         ctx.fillStyle = '#3a3020';
-        ctx.fillRect(0, this.height - 20, this.width, 20);
-        // Ground detail
-        ctx.fillStyle = '#4a4030';
-        ctx.fillRect(0, this.height - 20, this.width, 2);
+        ctx.fillRect(0, this.height - 40, this.width, 40);
+        // Ground detail line
+        ctx.fillStyle = '#5a5040';
+        ctx.fillRect(0, this.height - 40, this.width, 3);
         // Ground texture
-        for (let i = 0; i < this.width; i += 8) {
-            if ((i + Math.floor(cam.x)) % 16 < 8) {
+        for (let i = 0; i < this.width; i += 12) {
+            if ((i + Math.floor(cam.x)) % 24 < 12) {
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.03)';
-                ctx.fillRect(i, this.height - 18, 8, 18);
+                ctx.fillRect(i, this.height - 37, 12, 37);
             }
+        }
+        // Ground pebbles
+        ctx.fillStyle = 'rgba(80, 70, 50, 0.5)';
+        for (let i = 0; i < this.width; i += 40) {
+            const px = (i + Math.floor(cam.x * 0.8)) % this.width;
+            ctx.beginPath();
+            ctx.arc(px, this.height - 20, 3, 0, Math.PI * 2);
+            ctx.fill();
         }
 
         // Game world (camera transform)
@@ -312,7 +376,7 @@ const Game = {
 
         // Draw UI (fixed to screen)
         UI.draw(ctx, this.player, this.score, this.width);
-        UI.drawWaveInfo(ctx, EnemySpawner.difficulty, EnemySpawner.enemiesDefeated, this.width);
+        UI.drawWaveInfo(ctx, EnemySpawner.difficulty, EnemySpawner.enemiesDefeated, this.width, this.difficulty ? this.difficulty.label : '');
 
         ctx.restore(); // shake
     },
@@ -327,9 +391,9 @@ const Game = {
                 if (wMod < -m.w || wMod > this.width + m.w) continue;
                 ctx.fillStyle = m.color;
                 ctx.beginPath();
-                ctx.moveTo(wMod, this.height - 20);
-                ctx.lineTo(wMod + m.w / 2, this.height - 20 - m.h);
-                ctx.lineTo(wMod + m.w, this.height - 20);
+                ctx.moveTo(wMod, this.height - 40);
+                ctx.lineTo(wMod + m.w / 2, this.height - 40 - m.h);
+                ctx.lineTo(wMod + m.w, this.height - 40);
                 ctx.closePath();
                 ctx.fill();
             }
@@ -344,15 +408,15 @@ const Game = {
                 if (wMod < -b.w || wMod > this.width + b.w) continue;
 
                 ctx.fillStyle = b.color;
-                ctx.fillRect(wMod, this.height - 20 - b.h, b.w, b.h);
+                ctx.fillRect(wMod, this.height - 40 - b.h, b.w, b.h);
 
                 // Roof
                 if (b.roof) {
                     ctx.fillStyle = '#884422';
                     ctx.beginPath();
-                    ctx.moveTo(wMod - 3, this.height - 20 - b.h);
-                    ctx.lineTo(wMod + b.w / 2, this.height - 20 - b.h - 12);
-                    ctx.lineTo(wMod + b.w + 3, this.height - 20 - b.h);
+                    ctx.moveTo(wMod - 3, this.height - 40 - b.h);
+                    ctx.lineTo(wMod + b.w / 2, this.height - 40 - b.h - 12);
+                    ctx.lineTo(wMod + b.w + 3, this.height - 40 - b.h);
                     ctx.closePath();
                     ctx.fill();
                 }
@@ -360,8 +424,8 @@ const Game = {
                 // Windows
                 const winColor = Math.random() > 0.3 ? '#FFDD88' : '#443322';
                 for (let wi = 0; wi < b.windows; wi++) {
-                    const wy = this.height - 20 - b.h + 8 + wi * 12;
-                    if (wy + 6 > this.height - 20) break;
+                    const wy = this.height - 40 - b.h + 8 + wi * 12;
+                    if (wy + 6 > this.height - 40) break;
                     ctx.fillStyle = winColor;
                     ctx.fillRect(wMod + b.w / 2 - 3, wy, 6, 6);
                 }
@@ -378,12 +442,12 @@ const Game = {
 
                 // Trunk
                 ctx.fillStyle = '#5a3a1a';
-                ctx.fillRect(wMod, this.height - 20 - t.trunkH, 4, t.trunkH);
+                ctx.fillRect(wMod, this.height - 40 - t.trunkH, 4, t.trunkH);
 
                 // Foliage
                 ctx.fillStyle = t.color;
                 ctx.beginPath();
-                ctx.arc(wMod + 2, this.height - 20 - t.trunkH - t.h / 2, t.h / 2, 0, Math.PI * 2);
+                ctx.arc(wMod + 2, this.height - 40 - t.trunkH - t.h / 2, t.h / 2, 0, Math.PI * 2);
                 ctx.fill();
             }
         }
