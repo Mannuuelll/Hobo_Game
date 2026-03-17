@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naruto Brawl - Endless Fighter</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="title-screen">
+            <h1>NARUTO BRAWL</h1>
+            <p class="subtitle">Endless Fighter</p>
+            <div class="controls-info">
+                <h3>Steuerung</h3>
+                <p><strong>Bewegen:</strong> A / D oder Pfeiltasten</p>
+                <p><strong>Springen:</strong> W oder Pfeil Hoch</p>
+                <p><strong>Schlagen:</strong> J</p>
+                <p><strong>Treten:</strong> K</p>
+                <p><strong>Rasengan:</strong> U</p>
+                <p><strong>Shadow Clone:</strong> I</p>
+                <p><strong>Rasenshuriken:</strong> O</p>
+                <p><strong>Blocken:</strong> L</p>
+            </div>
+            <button id="startBtn" onclick="startGame()">KAMPF STARTEN</button>
+        </div>
+        <div id="game-over-screen" style="display:none;">
+            <h1>K.O.!</h1>
+            <p id="final-score">Score: 0</p>
+            <p id="final-combo">Max Combo: 0</p>
+            <button onclick="startGame()">NOCHMAL</button>
+        </div>
+    </div>
+    <script src="js/sprites.js"></script>
+    <script src="js/effects.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/enemy.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>
