@@ -2,8 +2,8 @@ class Player {
     constructor(x, y) {
         this.x = x;
         this.y = y;
-        this.w = 48;
-        this.h = 72;
+        this.w = 64;
+        this.h = 96;
         this.vx = 0;
         this.vy = 0;
         this.speed = 4;
@@ -19,6 +19,7 @@ class Player {
         this.chakra = 100;
         this.maxChakra = 100;
         this.chakraRegen = 0.08;
+        this.damageMult = 1.0;
 
         this.state = 'idle'; // idle, walking, jumping, attacking, hurt, blocking
         this.attackTimer = 0;
@@ -173,14 +174,14 @@ class Player {
 
     punch() {
         this.state = 'attacking';
-        this.currentAttack = { type: 'punch', damage: 8, range: 55, knockback: 3 };
+        this.currentAttack = { type: 'punch', damage: Math.floor(8 * this.damageMult), range: 70, knockback: 3 };
         this.attackTimer = 15;
         this.attackDuration = 15;
     }
 
     kick() {
         this.state = 'attacking';
-        this.currentAttack = { type: 'kick', damage: 12, range: 60, knockback: 5 };
+        this.currentAttack = { type: 'kick', damage: Math.floor(12 * this.damageMult), range: 75, knockback: 5 };
         this.attackTimer = 20;
         this.attackDuration = 20;
     }
@@ -191,7 +192,7 @@ class Player {
         this.cooldowns.rasengan = this.cooldownMax.rasengan;
 
         this.state = 'attacking';
-        this.currentAttack = { type: 'rasengan', damage: 35, range: 70, knockback: 12 };
+        this.currentAttack = { type: 'rasengan', damage: Math.floor(35 * this.damageMult), range: 90, knockback: 12 };
         this.attackTimer = 25;
         this.attackDuration = 25;
 
@@ -206,7 +207,7 @@ class Player {
         this.cooldowns.shadowClone = this.cooldownMax.shadowClone;
 
         this.state = 'attacking';
-        this.currentAttack = { type: 'shadowClone', damage: 20, range: 100, knockback: 6, aoe: true };
+        this.currentAttack = { type: 'shadowClone', damage: Math.floor(20 * this.damageMult), range: 120, knockback: 6, aoe: true };
         this.attackTimer = 30;
         this.attackDuration = 30;
 
@@ -220,7 +221,7 @@ class Player {
         this.cooldowns.rasenshuriken = this.cooldownMax.rasenshuriken;
 
         this.state = 'attacking';
-        this.currentAttack = { type: 'rasenshuriken', damage: 45, range: 300, knockback: 15, projectile: true };
+        this.currentAttack = { type: 'rasenshuriken', damage: Math.floor(45 * this.damageMult), range: 400, knockback: 15, projectile: true };
         this.attackTimer = 25;
         this.attackDuration = 25;
 
