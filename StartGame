@@ -1,0 +1,8 @@
+Das game wird mit folgendem Befehl gestartet:
+
+cd C:\Users\manue\IdeaProjects\Hobo_Game\.claude\worktrees\awesome-sinoussi
+python -m http.server 8080
+
+
+und dann auf den Link:
+http://localhost:8080
