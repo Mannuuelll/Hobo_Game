@@ -145,27 +145,24 @@ const Game = {
         // Spawn enemies
         EnemySpawner.update(this.enemies, this.player, groundLevel);
 
-        // Update enemies
-        this.enemies = this.enemies.filter(enemy => {
-            const alive = enemy.update(this.player, groundLevel);
-            return alive;
-        });
+        // Update enemies and handle dead ones
+        const livingEnemies = [];
+        for (const enemy of this.enemies) {
+            enemy.update(this.player, groundLevel);
 
-        // Remove dead enemies and add score
-        const toRemove = [];
-        for (let i = this.enemies.length - 1; i >= 0; i--) {
-            if (this.enemies[i].isDead) {
-                this.score += this.enemies[i].points;
+            if (enemy.isDead) {
+                // Award points when enemy fully dies
+                this.score += enemy.points;
                 if (this.player.comboCount > 0) {
-                    this.score += Math.floor(this.enemies[i].points * this.player.comboCount * 0.1);
+                    this.score += Math.floor(enemy.points * this.player.comboCount * 0.1);
                 }
                 EnemySpawner.onEnemyDefeated();
-                toRemove.push(i);
+                // Don't keep this enemy
+            } else {
+                livingEnemies.push(enemy);
             }
         }
-        for (const i of toRemove) {
-            this.enemies.splice(i, 1);
-        }
+        this.enemies = livingEnemies;
 
         // Player attack collision
         const playerHitbox = this.player.getAttackHitbox();
