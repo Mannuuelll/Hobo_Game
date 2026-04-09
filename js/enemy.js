@@ -20,7 +20,7 @@ class Enemy {
         this.hurtTimer = 0;
         this.deathTimer = 0;
         this.aiTimer = 0;
-        this.aggroRange = 250;
+        this.aggroRange = 500;
         this.attackRange = 55;
 
         // Set stats based on type
@@ -232,14 +232,16 @@ const EnemySpawner = {
     waveTimer: 0,
     difficulty: 1,
     enemiesDefeated: 0,
-    spawnInterval: 180, // 3 seconds initially
+    spawnInterval: 90, // 1.5 seconds initially
+    noEnemyTimer: 0,
 
     reset() {
-        this.spawnTimer = 60; // first enemies come quick
+        this.spawnTimer = 30; // first enemies come quick
         this.waveTimer = 0;
         this.difficulty = 1;
         this.enemiesDefeated = 0;
-        this.spawnInterval = 180;
+        this.spawnInterval = 90;
+        this.noEnemyTimer = 0;
     },
 
     update(enemies, player, groundLevel) {
@@ -249,18 +251,32 @@ const EnemySpawner = {
         // Increase difficulty over time
         if (this.waveTimer % 600 === 0) { // every 10 seconds
             this.difficulty += 0.2;
-            this.spawnInterval = Math.max(60, this.spawnInterval - 10);
+            this.spawnInterval = Math.max(40, this.spawnInterval - 8);
         }
 
-        // Spawn enemies
-        if (this.spawnTimer <= 0 && enemies.length < this.getMaxEnemies()) {
+        // Count only alive enemies (not in death animation)
+        const aliveCount = enemies.filter(e => e.alive).length;
+
+        // Force spawn if no alive enemies for too long
+        if (aliveCount === 0) {
+            this.noEnemyTimer++;
+            if (this.noEnemyTimer > 60) { // 1 second with no enemies
+                this.spawnTimer = 0;
+                this.noEnemyTimer = 0;
+            }
+        } else {
+            this.noEnemyTimer = 0;
+        }
+
+        // Spawn enemies (only count alive ones for max check)
+        if (this.spawnTimer <= 0 && aliveCount < this.getMaxEnemies()) {
             this.spawnEnemy(enemies, player, groundLevel);
-            this.spawnTimer = this.spawnInterval + Math.floor(Math.random() * 60);
+            this.spawnTimer = this.spawnInterval + Math.floor(Math.random() * 30);
         }
     },
 
     getMaxEnemies() {
-        return Math.min(6, 2 + Math.floor(this.difficulty / 2));
+        return Math.min(8, 2 + Math.floor(this.difficulty / 2));
     },
 
     spawnEnemy(enemies, player, groundLevel) {
@@ -278,9 +294,9 @@ const EnemySpawner = {
 
         const type = availableTypes[Math.floor(Math.random() * availableTypes.length)];
 
-        // Spawn at screen edges, away from player
+        // Spawn just outside the visible screen area
         const side = Math.random() > 0.5 ? 1 : -1;
-        const spawnX = player.x + side * (400 + Math.random() * 200);
+        const spawnX = player.x + side * (200 + Math.random() * 150);
 
         const enemy = new Enemy(
             Math.max(0, spawnX),
