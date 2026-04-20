@@ -23,8 +23,6 @@ body {
 canvas {
     display: block;
     background: #222;
-    image-rendering: pixelated;
-    image-rendering: crisp-edges;
     width: 960px;
     height: 540px;
 }
@@ -116,4 +114,43 @@ button:hover {
     background: linear-gradient(180deg, #ff8800, #ff5500);
     transform: scale(1.05);
     box-shadow: 0 0 20px rgba(255, 107, 0, 0.5);
+}
+
+.difficulty-select {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.difficulty-select h3 {
+    color: #ff6b00;
+    margin-bottom: 10px;
+    font-size: 16px;
+}
+
+.diff-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.diff-btn {
+    padding: 8px 20px;
+    font-size: 14px;
+    background: rgba(50, 50, 50, 0.8);
+    border: 2px solid #555;
+    color: #aaa;
+    letter-spacing: 1px;
+}
+
+.diff-btn:hover {
+    background: rgba(80, 80, 80, 0.8);
+    border-color: #888;
+    transform: scale(1.05);
+}
+
+.diff-btn.selected {
+    background: linear-gradient(180deg, #ff6b00, #cc4400);
+    border-color: #ff8800;
+    color: #fff;
+    box-shadow: 0 0 12px rgba(255, 107, 0, 0.4);
 }

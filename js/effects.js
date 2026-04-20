@@ -124,7 +124,7 @@ const Effects = {
         ctx.globalAlpha = alpha;
 
         // Draw a ghost-like Naruto clone
-        Sprites.drawPixelChar(ctx, e.x, e.y, 48, 72, Sprites.colors.naruto, e.timer, e.facingRight, 'naruto');
+        Sprites.drawPixelChar(ctx, e.x, e.y, 64, 96, Sprites.colors.naruto, e.timer, e.facingRight, 'naruto');
 
         // Smoky poof effect at creation
         if (e.timer < 15) {

@@ -2,8 +2,8 @@ class Enemy {
     constructor(x, y, type, difficulty) {
         this.x = x;
         this.y = y;
-        this.w = 48;
-        this.h = 72;
+        this.w = 64;
+        this.h = 96;
         this.vx = 0;
         this.vy = 0;
         this.gravity = 0.6;
@@ -41,10 +41,16 @@ class Enemy {
         const stats = base[type] || base.zabuza;
         const scale = 1 + (diff - 1) * 0.3;
 
-        this.maxHp = Math.floor(stats.hp * scale);
+        // Apply difficulty multipliers from game settings
+        const ds = (typeof Game !== 'undefined' && Game.difficulty) ? Game.difficulty : {};
+        const hpMult = ds.enemyHpMult || 1;
+        const dmgMult = ds.enemyDamageMult || 1;
+        const spdMult = ds.enemySpeedMult || 1;
+
+        this.maxHp = Math.floor(stats.hp * scale * hpMult);
         this.hp = this.maxHp;
-        this.speed = stats.speed * (1 + (diff - 1) * 0.1);
-        this.damage = Math.floor(stats.damage * scale);
+        this.speed = stats.speed * (1 + (diff - 1) * 0.1) * spdMult;
+        this.damage = Math.floor(stats.damage * scale * dmgMult);
         this.points = Math.floor(stats.points * scale);
         this.attackCdMax = Math.max(20, Math.floor(stats.attackCd / (1 + (diff - 1) * 0.15)));
         this.name = stats.name;
@@ -229,15 +235,17 @@ const EnemySpawner = {
     waveTimer: 0,
     difficulty: 1,
     enemiesDefeated: 0,
-    spawnInterval: 90, // 1.5 seconds initially
+    spawnInterval: 90,
     noEnemyTimer: 0,
+    settings: null,
 
-    reset() {
-        this.spawnTimer = 30; // first enemies come quick
+    reset(diffSettings) {
+        this.settings = diffSettings || DifficultySettings.medium;
+        this.spawnTimer = 30;
         this.waveTimer = 0;
         this.difficulty = 1;
         this.enemiesDefeated = 0;
-        this.spawnInterval = 90;
+        this.spawnInterval = this.settings.spawnInterval;
         this.noEnemyTimer = 0;
     },
 
@@ -246,9 +254,10 @@ const EnemySpawner = {
         this.spawnTimer--;
 
         // Increase difficulty over time
-        if (this.waveTimer % 600 === 0) { // every 10 seconds
-            this.difficulty += 0.2;
-            this.spawnInterval = Math.max(40, this.spawnInterval - 8);
+        const growth = this.settings ? this.settings.difficultyGrowth : 0.2;
+        if (this.waveTimer % 600 === 0) {
+            this.difficulty += growth;
+            this.spawnInterval = Math.max(40, this.spawnInterval - 5);
         }
 
         // Count only alive enemies (not in death animation)
@@ -257,7 +266,7 @@ const EnemySpawner = {
         // Force spawn if no alive enemies for too long
         if (aliveCount === 0) {
             this.noEnemyTimer++;
-            if (this.noEnemyTimer > 60) { // 1 second with no enemies
+            if (this.noEnemyTimer > 60) {
                 this.spawnTimer = 0;
                 this.noEnemyTimer = 0;
             }
@@ -273,7 +282,8 @@ const EnemySpawner = {
     },
 
     getMaxEnemies() {
-        return Math.min(8, 2 + Math.floor(this.difficulty / 2));
+        const max = this.settings ? this.settings.maxEnemies : 8;
+        return Math.min(max, 2 + Math.floor(this.difficulty / 2));
     },
 
     spawnEnemy(enemies, player, groundLevel) {
@@ -297,7 +307,7 @@ const EnemySpawner = {
 
         const enemy = new Enemy(
             Math.max(0, spawnX),
-            groundLevel - 72,
+            groundLevel - 96,
             type,
             Math.floor(this.difficulty)
         );

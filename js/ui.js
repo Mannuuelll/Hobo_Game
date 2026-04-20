@@ -182,15 +182,20 @@ const UI = {
         // This is handled by the HTML overlay
     },
 
-    drawWaveInfo(ctx, difficulty, enemiesDefeated, screenWidth) {
+    drawWaveInfo(ctx, difficulty, enemiesDefeated, screenWidth, diffLabel) {
         const x = screenWidth - 15;
         ctx.textAlign = 'right';
+        if (diffLabel) {
+            ctx.fillStyle = '#FFAA00';
+            ctx.font = 'bold 12px monospace';
+            ctx.fillText(diffLabel, x, 55);
+        }
         ctx.fillStyle = '#FF8800';
         ctx.font = '12px monospace';
-        ctx.fillText(`Level: ${Math.floor(difficulty)}`, x, 55);
+        ctx.fillText(`Level: ${Math.floor(difficulty)}`, x, 70);
         ctx.fillStyle = '#AAAAAA';
         ctx.font = '10px monospace';
-        ctx.fillText(`Besiegt: ${enemiesDefeated}`, x, 70);
+        ctx.fillText(`Besiegt: ${enemiesDefeated}`, x, 85);
         ctx.textAlign = 'left';
     }
 };

@@ -23,12 +23,25 @@
                 <p><strong>Rasenshuriken:</strong> O</p>
                 <p><strong>Blocken:</strong> L</p>
             </div>
+            <div class="difficulty-select">
+                <h3>Schwierigkeit</h3>
+                <div class="diff-buttons">
+                    <button class="diff-btn selected" data-diff="easy" onclick="selectDifficulty('easy')">Einfach</button>
+                    <button class="diff-btn" data-diff="medium" onclick="selectDifficulty('medium')">Mittel</button>
+                    <button class="diff-btn" data-diff="hard" onclick="selectDifficulty('hard')">Schwer</button>
+                </div>
+            </div>
             <button id="startBtn" onclick="startGame()">KAMPF STARTEN</button>
         </div>
         <div id="game-over-screen" style="display:none;">
             <h1>K.O.!</h1>
             <p id="final-score">Score: 0</p>
             <p id="final-combo">Max Combo: 0</p>
+            <div class="diff-buttons" style="margin-bottom:15px;">
+                <button class="diff-btn" data-diff="easy" onclick="selectDifficulty('easy')">Einfach</button>
+                <button class="diff-btn selected" data-diff="medium" onclick="selectDifficulty('medium')">Mittel</button>
+                <button class="diff-btn" data-diff="hard" onclick="selectDifficulty('hard')">Schwer</button>
+            </div>
             <button onclick="startGame()">NOCHMAL</button>
         </div>
     </div>
